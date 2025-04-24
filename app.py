@@ -5,10 +5,12 @@ from scipy.stats import truncnorm
 
 st.title("Achievement Simulator")
 
-# 🎯 Truncated normal generator (true truncation, not clipping)
-def generate_truncnorm(mean, std, size):
-    a, b = (0 - mean) / std, (100 - mean) / std
-    return truncnorm.rvs(a, b, loc=mean, scale=std, size=size)
+# 🎯 Truncated normal generator (rounded to int like Colab)
+def truncated_normal(mean, std_dev, size, min_val=0, max_val=100):
+    lower = (min_val - mean) / std_dev
+    upper = (max_val - mean) / std_dev
+    values = truncnorm.rvs(lower, upper, loc=mean, scale=std_dev, size=size)
+    return np.round(values).astype(int)
 
 # 🎛️ Population dropdown (max 100,000)
 population_options = (
@@ -28,7 +30,6 @@ effort = st.slider("Your Effort (1–100)", 1, 100, 50, key="effort")
 attempts = st.selectbox("Number of Attempts", [1, 5, 10, 20, 30], index=2, key="attempts")
 competition_cutoff = st.slider("Competition – Top X%", 1, 100, 10, step=1, key="competition")
 
-# Fixed simulation settings
 num_runs = 10000
 st.write(f"📊 Population: **{population:,}** | 🎯 Target: **Top {competition_cutoff}%** | 🔁 Repeats: **{num_runs}**")
 st.write(f"🧠 Talent: **{talent}**, 💪 Effort: **{effort}**, 🔁 Attempts: **{attempts}**")
@@ -53,25 +54,28 @@ if st.button("Run Simulation"):
         success_count = 0
 
         for run in range(num_runs):
-            talent_pop = np.round(generate_truncnorm(50, 20, population))
-            effort_pop = np.round(generate_truncnorm(50, 20, population))
-            luck_pop = np.round(generate_truncnorm(50, 20, (population, attempts)))
+            talent_pop = truncated_normal(50, 20, population)
+            effort_pop = truncated_normal(50, 20, population)
+            luck_pop = np.array([truncated_normal(50, 20, population) for _ in range(attempts)]).T
 
+            # Show histograms (first run only)
             if run == 0:
                 st.subheader("🔍 Input Distributions")
 
+                bins = np.arange(0, 102) - 0.5  # Centers on whole numbers from 0–100
+
                 fig1, ax1 = plt.subplots()
-                ax1.hist(talent_pop, bins=range(0, 101), color='skyblue', edgecolor='black')
+                ax1.hist(talent_pop, bins=bins, color='skyblue', edgecolor='black')
                 ax1.set_title("Talent Distribution")
                 st.pyplot(fig1)
 
                 fig2, ax2 = plt.subplots()
-                ax2.hist(effort_pop, bins=range(0, 101), color='lightgreen', edgecolor='black')
+                ax2.hist(effort_pop, bins=bins, color='lightgreen', edgecolor='black')
                 ax2.set_title("Effort Distribution")
                 st.pyplot(fig2)
 
                 fig3, ax3 = plt.subplots()
-                ax3.hist(luck_pop[:, 0], bins=range(0, 101), color='orange', edgecolor='black')
+                ax3.hist(luck_pop[:, 0], bins=bins, color='orange', edgecolor='black')
                 ax3.set_title("Luck Distribution (1st Attempt)")
                 st.pyplot(fig3)
 
@@ -80,4 +84,24 @@ if st.button("Run Simulation"):
                 achievement_pop += (
                     (talent_pop * talent_weight)
                     + (effort_pop * effort_weight)
-                    + (luck_pop[:, i_
+                    + (luck_pop[:, i] * luck_weight)
+                )
+
+            user_luck = np.random.randint(0, 101, size=attempts)
+            user_achievement = 0
+            for i in range(attempts):
+                user_achievement += (
+                    (talent * talent_weight)
+                    + (effort * effort_weight)
+                    + (user_luck[i] * luck_weight)
+                )
+
+            threshold = np.percentile(achievement_pop, 100 - competition_cutoff)
+            if user_achievement >= threshold:
+                success_count += 1
+
+        chance = (success_count / num_runs) * 100
+        st.subheader("📈 Results")
+        st.write(f"You have a **{chance:.1f}% chance** of being in the **top {competition_cutoff}%**.")
+    else:
+        st.error("⚠️ Simulation cannot run: Weightings must sum to 1.0.")
