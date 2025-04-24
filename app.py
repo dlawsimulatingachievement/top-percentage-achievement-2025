@@ -7,7 +7,7 @@ st.title("Achievement Simulator")
 population_options = (
     list(range(100, 1000, 100)) +          # 100 to 900 (steps of 100)
     list(range(1000, 10000, 1000)) +       # 1,000 to 9,000 (steps of 1,000)
-    list(range(10000, 100001, 10000)) +    # 10,000 to 100,000 (steps of 10,000)
+    list(range(10000, 100001, 10000))      # 10,000 to 100,000 (steps of 10,000)
 )
 
 population = st.selectbox(
