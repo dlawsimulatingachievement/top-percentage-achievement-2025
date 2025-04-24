@@ -3,6 +3,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.stats import truncnorm
 
+np.random.seed(42)  # ✅ Ensures reproducibility across sessions
+
 st.title("Achievement Simulator")
 
 # 🎯 Truncated normal generator (rounded to int like Colab)
@@ -35,7 +37,7 @@ show_distributions = st.checkbox("Show input distribution plots", value=False)
 
 num_runs = 10000
 st.write(f"📊 Population: **{population:,}** | 🎯 Target: **Top {competition_cutoff}%**")
-st.write(f"🧠 Talent: **{talent}**, 💪 Effort: **{effort}**, 🔁 Attempts: **{attempts}**")
+st.write(f"🧐 Talent: **{talent}**, 💪 Effort: **{effort}**, 🔁 Attempts: **{attempts}**")
 
 # ⚙️ Optional weightings
 with st.expander("Optional: Adjust Weightings (Must sum to 1.0)"):
@@ -56,9 +58,11 @@ if st.button("Run Simulation"):
 
         success_count = 0
 
+        # ✅ Precompute fixed population once
+        talent_pop = truncated_normal(50, 20, population)
+        effort_pop = truncated_normal(50, 20, population)
+
         for run in range(num_runs):
-            talent_pop = truncated_normal(50, 20, population)
-            effort_pop = truncated_normal(50, 20, population)
             luck_pop = np.array([truncated_normal(50, 20, population) for _ in range(attempts)]).T
 
             # ✅ FIXED: Only show plots if checkbox is selected AND first run
