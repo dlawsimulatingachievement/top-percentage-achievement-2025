@@ -30,11 +30,11 @@ effort = st.slider("Your Effort (1–100)", 1, 100, 50, key="effort")
 attempts = st.selectbox("Number of Attempts", [1, 5, 10, 20, 30], index=2, key="attempts")
 competition_cutoff = st.slider("Competition – Top X%", 1, 100, 10, step=1, key="competition")
 
-# 🎛️ Toggle for plotting
+# ✅ NEW: Checkbox to control whether distributions are shown
 show_distributions = st.checkbox("Show input distribution plots", value=False)
 
 num_runs = 10000
-st.write(f"📊 Population: **{population:,}** | 🎯 Target: **Top {competition_cutoff}%** | 🔁 Repeats: **{num_runs}**")
+st.write(f"📊 Population: **{population:,}** | 🎯 Target: **Top {competition_cutoff}%**")
 st.write(f"🧠 Talent: **{talent}**, 💪 Effort: **{effort}**, 🔁 Attempts: **{attempts}**")
 
 # ⚙️ Optional weightings
@@ -61,11 +61,11 @@ if st.button("Run Simulation"):
             effort_pop = truncated_normal(50, 20, population)
             luck_pop = np.array([truncated_normal(50, 20, population) for _ in range(attempts)]).T
 
-            # Only show plots if checkbox is selected
+            # ✅ FIXED: Only show plots if checkbox is selected AND first run
             if show_distributions and run == 0:
                 st.subheader("🔍 Input Distributions")
 
-                bins = np.arange(0, 102) - 0.5  # Centers bins on whole numbers
+                bins = np.arange(0, 102) - 0.5
 
                 fig1, ax1 = plt.subplots()
                 ax1.hist(talent_pop, bins=bins, color='skyblue', edgecolor='black')
@@ -82,6 +82,7 @@ if st.button("Run Simulation"):
                 ax3.set_title("Luck Distribution (1st Attempt)")
                 st.pyplot(fig3)
 
+            # Achievement calculation
             achievement_pop = np.zeros(population)
             for i in range(attempts):
                 achievement_pop += (
