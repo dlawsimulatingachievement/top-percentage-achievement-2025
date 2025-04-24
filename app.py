@@ -105,3 +105,4 @@ if st.button("Run Simulation"):
         st.subheader("📈 Results")
         st.write(f"You have a **{chance:.1f}% chance** of being in the **top {competition_cutoff}%**.")
     else:
+        st.error("⚠️ Simulation cannot run: Weightings must sum to 1.0.")
