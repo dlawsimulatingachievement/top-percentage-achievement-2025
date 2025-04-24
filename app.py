@@ -30,6 +30,9 @@ effort = st.slider("Your Effort (1–100)", 1, 100, 50, key="effort")
 attempts = st.selectbox("Number of Attempts", [1, 5, 10, 20, 30], index=2, key="attempts")
 competition_cutoff = st.slider("Competition – Top X%", 1, 100, 10, step=1, key="competition")
 
+# 🎛️ Toggle for plotting
+show_distributions = st.checkbox("Show input distribution plots", value=False)
+
 num_runs = 10000
 st.write(f"📊 Population: **{population:,}** | 🎯 Target: **Top {competition_cutoff}%** | 🔁 Repeats: **{num_runs}**")
 st.write(f"🧠 Talent: **{talent}**, 💪 Effort: **{effort}**, 🔁 Attempts: **{attempts}**")
@@ -58,11 +61,11 @@ if st.button("Run Simulation"):
             effort_pop = truncated_normal(50, 20, population)
             luck_pop = np.array([truncated_normal(50, 20, population) for _ in range(attempts)]).T
 
-            # Show histograms (first run only)
-            if run == 0:
+            # Only show plots if checkbox is selected
+            if show_distributions and run == 0:
                 st.subheader("🔍 Input Distributions")
 
-                bins = np.arange(0, 102) - 0.5  # Centers on whole numbers from 0–100
+                bins = np.arange(0, 102) - 0.5  # Centers bins on whole numbers
 
                 fig1, ax1 = plt.subplots()
                 ax1.hist(talent_pop, bins=bins, color='skyblue', edgecolor='black')
