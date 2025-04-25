@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.stats import truncnorm
 
-np.random.seed(42)  # ✅ Ensures reproducibility across sessions
+np.random.seed()  # ✅ Ensures reproducibility across sessions
 
 st.title("Achievement Simulator")
 
