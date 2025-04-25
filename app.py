@@ -35,7 +35,7 @@ competition_cutoff = st.slider("Competition – Top X%", 1, 100, 10, step=1, key
 # ✅ NEW: Checkbox to control whether distributions are shown
 show_distributions = st.checkbox("Show input distribution plots", value=False)
 
-num_runs = 10000
+num_runs = 1000
 st.write(f"📊 Population: **{population:,}** | 🎯 Target: **Top {competition_cutoff}%**")
 st.write(f"🧐 Talent: **{talent}**, 💪 Effort: **{effort}**, 🔁 Attempts: **{attempts}**")
 
